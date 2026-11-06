@@ -1,0 +1,166 @@
+import React from 'react';
+
+export function AnimationStyles() {
+  return (
+    <style>{`
+@keyframes lunglowFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    /* end at none so no containing block traps fixed-position children */
+    transform: none;
+  }
+}
+
+@keyframes lunglowScalePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes lunglowBarGrow {
+  0% {
+    transform: scaleY(0.12);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes lunglowFloatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes lunglowPulseGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes lunglowToastSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-page-enter {
+  animation: lunglowFadeSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-stagger-1 {
+  opacity: 0;
+  animation: lunglowFadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+.animate-stagger-2 {
+  opacity: 0;
+  animation: lunglowFadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.11s forwards;
+}
+
+.animate-stagger-3 {
+  opacity: 0;
+  animation: lunglowFadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.17s forwards;
+}
+
+.animate-stagger-4 {
+  opacity: 0;
+  animation: lunglowFadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.23s forwards;
+}
+
+.animate-pop {
+  animation: lunglowScalePop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-bar-grow {
+  transform-origin: bottom;
+  animation: lunglowBarGrow 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float-slow {
+  animation: lunglowFloatSlow 4.5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: lunglowPulseGlow 3.6s ease-in-out infinite;
+}
+
+.animate-toast-in {
+  animation: lunglowToastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.lunglow-card-interactive {
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+}
+
+.lunglow-card-interactive:hover {
+  transform: translateY(-2px);
+}
+
+.lunglow-btn-spring {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease,
+              background-color 0.2s ease,
+              filter 0.2s ease;
+}
+
+.lunglow-btn-spring:hover {
+  transform: translateY(-1.5px);
+}
+
+.lunglow-btn-spring:active {
+  transform: translateY(0) scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-enter,
+  .animate-stagger-1,
+  .animate-stagger-2,
+  .animate-stagger-3,
+  .animate-stagger-4,
+  .animate-pop,
+  .animate-bar-grow,
+  .animate-float-slow,
+  .animate-pulse-glow,
+  .animate-toast-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .lunglow-card-interactive:hover,
+  .lunglow-btn-spring:hover {
+    transform: none !important;
+  }
+}
+`}</style>
+  );
+}
