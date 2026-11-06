@@ -12,7 +12,7 @@ import { useLunglowData } from '../../hooks/useLunglowData';
 export function ProfileModal({ author, avatar, isYou = false, authorRole, onClose }) {
   const { isLight, t, themeTokens } = useTheme();
   const { userName, userAvatar } = useAuth();
-  const { managedUsers, metrics, handleOpenReportModal } = useLunglowData();
+  const { managedUsers, metrics, handleOpenReportModal, challenges } = useLunglowData();
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -44,6 +44,9 @@ export function ProfileModal({ author, avatar, isYou = false, authorRole, onClos
     { label: t.profile.totalSavedMoney, value: savedMoney != null ? `${savedMoney} $` : '—' },
     { label: t.profile.avoidedCigs, value: avoidedCigs != null ? avoidedCigs : '—' },
   ];
+
+  // Badges earned by completing challenges — shown on the profile pop-up.
+  const earnedBadges = isYou ? challenges.filter((c) => c.joined && c.progress >= c.days) : [];
 
   const openReportProfile = () => {
     onClose();
@@ -127,6 +130,25 @@ export function ProfileModal({ author, avatar, isYou = false, authorRole, onClos
           <p className={`text-[10px] sm:text-xs mt-3 ${themeTokens.mutedText}`}>
             {t.common.joined}: {joinedAt}
           </p>
+
+          {earnedBadges.length > 0 && (
+            <div className="mt-4 w-full">
+              <div className={`text-[10px] sm:text-xs font-extrabold uppercase tracking-widest mb-2 ${themeTokens.mutedText}`}>
+                {t.profile.earnedBadges}
+              </div>
+              <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                {earnedBadges.map((c) => (
+                  <div
+                    key={c.id}
+                    title={`${c.title} — ${c.reward}`}
+                    className="w-11 h-11 rounded-full bg-[#CABA3A]/20 border-2 border-[#CABA3A] flex items-center justify-center text-xl shadow-md"
+                  >
+                    {c.emoji || '🏆'}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-center gap-4 mt-6">
             <button

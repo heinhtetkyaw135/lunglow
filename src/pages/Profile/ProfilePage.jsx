@@ -7,6 +7,7 @@ import {
   FlameIcon,
   ArrowUpRightIcon,
   FlagReportIcon,
+  TrophyIcon,
 } from '../../components/common/Icons';
 import { LimitFormCard } from '../../components/common/LimitFormCard';
 import { MilestoneShareCards } from '../../components/common/MilestoneShareCards';
@@ -34,7 +35,11 @@ export function ProfilePage() {
     handleOpenReportModal,
     showToast,
     metrics,
+    challenges,
   } = useLunglowData();
+
+  // Challenges the user has completed (joined + full progress) earn a profile badge.
+  const earnedBadges = challenges.filter((c) => c.joined && c.progress >= c.days);
 
   return (
     <>
@@ -299,6 +304,43 @@ export function ProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Earned challenge badges — appears once the user completes a challenge */}
+      <div className={`rounded-3xl sm:rounded-[40px] border ${themeTokens.cardSurface} p-5 sm:p-8 mt-8`}>
+        <div className="flex items-center gap-2.5 mb-5">
+          <TrophyIcon className="w-6 h-6 text-[#CABA3A]" />
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            {t.profile.earnedBadges}
+          </h2>
+          <span className="rounded-full bg-[#CABA3A]/20 text-[#CABA3A] px-3 py-0.5 text-xs font-bold">
+            {earnedBadges.length}
+          </span>
+        </div>
+
+        {earnedBadges.length === 0 ? (
+          <p className={`text-sm ${themeTokens.mutedText}`}>{t.profile.noBadges}</p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {earnedBadges.map((c) => (
+              <div
+                key={c.id}
+                className={`rounded-3xl border ${themeTokens.subCardSurface} p-4 flex flex-col items-center text-center gap-2.5`}
+              >
+                <div className="w-14 h-14 rounded-full bg-[#CABA3A]/20 border-2 border-[#CABA3A] flex items-center justify-center text-3xl shadow-lg">
+                  {c.emoji || '🏆'}
+                </div>
+                <div className="font-bold text-sm sm:text-base text-[#CABA3A] leading-tight">
+                  {c.reward}
+                </div>
+                <div className={`text-[10px] sm:text-xs leading-tight ${themeTokens.mutedText}`}>
+                  {c.title}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <MilestoneShareCards />
     </>
   );

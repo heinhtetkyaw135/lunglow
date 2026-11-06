@@ -308,6 +308,17 @@ export function LunglowDataProvider({ children }) {
   };
 
   const handleChallengeLogDay = (challengeId) => {
+    const todayKey = new Date().toDateString();
+    const target = challenges.find((c) => c.id === challengeId);
+    // One log per calendar day — the button stays locked until tomorrow.
+    if (target && target.lastLogDate === todayKey) {
+      showToast(
+        lang === 'my'
+          ? 'ယနေ့အတွက် မှတ်သားပြီးပါပြီ — မနက်ဖြန်မှ ပြန်မှတ်နိုင်ပါမည်'
+          : 'Already logged today — come back tomorrow!'
+      );
+      return;
+    }
     setChallenges((prev) =>
       prev.map((c) => {
         if (c.id !== challengeId || !c.joined) return c;
@@ -315,10 +326,15 @@ export function LunglowDataProvider({ children }) {
         if (nextProgress === c.days && c.progress < c.days) {
           setTimeout(() => {
             handleResistTrigger();
+            pushNotification({
+              title: lang === 'my' ? 'စိန်ခေါ်မှု ပြီးမြောက်ပါပြီ!' : 'Challenge Completed!',
+              body: lang === 'my' ? `"${c.title}" - ${c.reward} ရရှိပါပြီ!` : `You earned the ${c.reward} for "${c.title}"!`,
+              kind: 'info',
+            });
             showToast(lang === 'my' ? `စိန်ခေါ်မှု ပြီးမြောက်ပါပြီ - "${c.title}"! ${c.reward} ရရှိပါပြီ!` : `Challenge complete — "${c.title}"! You earned the ${c.reward}!`);
           }, 0);
         }
-        return { ...c, progress: nextProgress };
+        return { ...c, progress: nextProgress, lastLogDate: todayKey };
       })
     );
   };

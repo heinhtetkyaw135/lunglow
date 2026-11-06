@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TrophyIcon, UsersGroupIcon, CheckCircleIcon, SparklesIcon } from '../../components/common/Icons';
+import { ChallengeDetailModal } from '../../components/common/ChallengeDetailModal';
 import { useTheme } from '../../hooks/useTheme';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
@@ -7,7 +8,9 @@ export function ChallengesPage() {
   const { t, isLight, themeTokens } = useTheme();
   const { challenges, handleJoinChallenge, handleChallengeLogDay } = useLunglowData();
   const [tab, setTab] = useState('live'); // 'live' | 'joined'
+  const [detailTarget, setDetailTarget] = useState(null);
 
+  const todayKey = new Date().toDateString();
   const liveChallenges = challenges.filter((c) => c.active);
   const joinedChallenges = challenges.filter((c) => c.joined);
   const shown = tab === 'live' ? liveChallenges : joinedChallenges;
@@ -61,6 +64,7 @@ export function ChallengesPage() {
         {shown.map((c, idx) => {
           const progressPct = Math.min(100, Math.round((c.progress / c.days) * 100));
           const completed = c.joined && c.progress >= c.days;
+          const loggedToday = c.lastLogDate === todayKey;
           return (
             <div
               key={c.id}
@@ -126,6 +130,16 @@ export function ChallengesPage() {
                 )}
 
                 <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
+                  {/* Detail button — always available */}
+                  <button
+                    type="button"
+                    onClick={() => setDetailTarget(c)}
+                    className={`px-5 py-2.5 text-xs sm:text-sm inline-flex items-center gap-1.5 ${themeTokens.secondaryBtn}`}
+                  >
+                    <SparklesIcon className="w-4 h-4" />
+                    {t.challenges.detailBtn}
+                  </button>
+
                   {completed ? (
                     <div className="rounded-full bg-[#5FB032]/20 border border-[#5FB032]/60 text-[#5FB032] px-5 py-2.5 text-xs sm:text-sm font-bold inline-flex items-center gap-2">
                       <SparklesIcon className="w-4 h-4" />
@@ -136,10 +150,14 @@ export function ChallengesPage() {
                       <button
                         type="button"
                         onClick={() => handleChallengeLogDay(c.id)}
-                        className={`px-6 py-2.5 text-sm inline-flex items-center gap-2 ${themeTokens.primaryBtn}`}
+                        disabled={loggedToday}
+                        title={loggedToday ? 'Already logged today' : ''}
+                        className={`px-6 py-2.5 text-sm inline-flex items-center gap-2 ${themeTokens.primaryBtn} ${
+                          loggedToday ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
                       >
                         <CheckCircleIcon className="w-4 h-4" />
-                        {t.challenges.logDayBtn}
+                        {loggedToday ? t.challenges.loggedToday : t.challenges.logDayBtn}
                       </button>
                       <button
                         type="button"
@@ -169,6 +187,10 @@ export function ChallengesPage() {
           );
         })}
       </div>
+
+      {detailTarget && (
+        <ChallengeDetailModal challenge={detailTarget} onClose={() => setDetailTarget(null)} />
+      )}
     </div>
   );
 }
