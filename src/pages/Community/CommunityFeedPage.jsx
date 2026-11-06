@@ -1,3 +1,5 @@
+
+
 import React, { useState, useRef } from 'react';
 import {
   TrashCanIcon,
@@ -5,12 +7,14 @@ import {
   FlagReportIcon,
   ArrowUpRightIcon,
 } from '../../components/common/Icons';
+import { ProfileModal } from '../../components/common/ProfileModal';
 import { ASSETS } from '../../types';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
 const TIP_TAGS = ['Tips & Tricks', 'Suggestion', 'Craving Hack', 'Motivation'];
+const INITIAL_COMMENT_COUNT = 3;
 
 export function CommunityFeedPage() {
   const { t, isLight, themeTokens } = useTheme();
@@ -32,7 +36,17 @@ export function CommunityFeedPage() {
   const [tipContent, setTipContent] = useState('');
   const [tipImage, setTipImage] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
+  const [profileTarget, setProfileTarget] = useState(null);
   const tipPhotoRef = useRef(null);
+
+  const openProfile = (post) =>
+    setProfileTarget({
+      author: post.isYou ? userName : post.author,
+      avatar: post.isYou ? userAvatar : post.authorAvatar,
+      isYou: !!post.isYou,
+      authorRole: post.authorRole,
+    });
 
   const handleTipPhotoUpload = (e) => {
     const file = e.target.files?.[0];
@@ -210,6 +224,11 @@ export function CommunityFeedPage() {
 
             const canDelete = isAdmin || post.isYou;
             const commentText = commentInputs[post.id] || '';
+            const postComments = post.comments || [];
+            const commentsExpanded = !!expandedComments[post.id];
+            const visibleComments = commentsExpanded
+              ? postComments
+              : postComments.slice(0, INITIAL_COMMENT_COUNT);
 
             return (
               <div
@@ -220,13 +239,18 @@ export function CommunityFeedPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3.5">
                     <div className="relative group">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-[#5FB032]/40 p-1 overflow-hidden">
+                      <button
+                        type="button"
+                        aria-label={`View ${post.author} profile`}
+                        onClick={() => openProfile(post)}
+                        className="block w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-[#5FB032]/40 p-1 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5FB032] cursor-pointer"
+                      >
                         <img
                           src={post.isYou ? userAvatar : post.authorAvatar || ASSETS.avatar}
                           alt={post.author}
                           className="w-full h-full rounded-full object-cover"
                         />
-                      </div>
+                      </button>
                       <button
                         type="button"
                         title={t.communityExtra.reportAvatar}
@@ -244,11 +268,15 @@ export function CommunityFeedPage() {
                       </button>
                     </div>
 
-                    <span className="text-lg sm:text-xl font-bold">
+                    <button
+                      type="button"
+                      onClick={() => openProfile(post)}
+                      className="text-lg sm:text-xl font-bold hover:text-[#5FB032] transition text-left cursor-pointer"
+                    >
                       {post.isYou
                         ? `${userName} ${t.community.youSuffix}`
                         : post.author}
-                    </span>
+                    </button>
                   </div>
 
                   <div
@@ -366,10 +394,10 @@ export function CommunityFeedPage() {
                 {/* Comments Section */}
                 <div className={`rounded-2xl sm:rounded-3xl border ${themeTokens.subCardSurface} p-4 sm:p-5 flex flex-col gap-3`}>
                   <div className="text-xs sm:text-sm font-bold text-[#5FB032]">
-                    {t.communityExtra.commentsLabel} ({(post.comments || []).length})
+                    {t.communityExtra.commentsLabel} ({postComments.length})
                   </div>
 
-                  {(post.comments || []).map((com) => (
+                  {visibleComments.map((com) => (
                     <div
                       key={com.id}
                       className={`rounded-2xl border px-4 py-2.5 flex items-start justify-between gap-3 ${
@@ -427,6 +455,25 @@ export function CommunityFeedPage() {
                     </div>
                   ))}
 
+                  {postComments.length > INITIAL_COMMENT_COUNT && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedComments((prev) => ({
+                          ...prev,
+                          [post.id]: !commentsExpanded,
+                        }))
+                      }
+                      className={`self-start text-xs sm:text-sm font-bold transition hover:underline ${
+                        isLight ? 'text-[#3A7B18]' : 'text-[#5FB032]'
+                      }`}
+                    >
+                      {commentsExpanded
+                        ? t.common.seeLess
+                        : `${t.common.seeMore} (${postComments.length - INITIAL_COMMENT_COUNT})`}
+                    </button>
+                  )}
+
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -457,6 +504,16 @@ export function CommunityFeedPage() {
             );
           })}
       </div>
+
+      {profileTarget && (
+        <ProfileModal
+          author={profileTarget.author}
+          avatar={profileTarget.avatar}
+          isYou={profileTarget.isYou}
+          authorRole={profileTarget.authorRole}
+          onClose={() => setProfileTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -436,7 +436,8 @@ export function LunglowDataProvider({ children }) {
   };
 
   // Blog Actions (Create, Like, Delete, Comment)
-  const handleCreateBlog = ({ title, category, content, image }) => {
+  const handleCreateBlog = ({ title, category, content, image, images }) => {
+    const photoList = Array.isArray(images) && images.length > 0 ? images : (image ? [image] : []);
     const newBlog = {
       id: `blog-${Date.now()}`,
       title: title.trim() || 'Untitled Lunglow Article',
@@ -445,7 +446,8 @@ export function LunglowDataProvider({ children }) {
       authorRole: isAdmin ? 'admin' : 'member',
       authorAvatar: userAvatar,
       createdAt: 'Oct 18, 2026',
-      image: image || null,
+      image: photoList[0] || null,
+      images: photoList,
       content: content.trim(),
       likes: 1,
       userLiked: true,

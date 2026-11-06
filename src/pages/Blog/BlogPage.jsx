@@ -6,12 +6,16 @@ import {
   ArrowUpRightIcon,
   NavAdminShieldIcon,
 } from '../../components/common/Icons';
+import { ProfileModal } from '../../components/common/ProfileModal';
 import { ASSETS } from '../../types';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
 const BLOG_CATEGORIES = ['Official Guide', 'Tips & Tricks', 'Success Story', 'Health & Science'];
+const MAX_BLOG_PHOTOS = 5;
+const INITIAL_COMMENT_COUNT = 3;
+const LONG_CONTENT_THRESHOLD = 420; // chars before "See more" collapses the body
 
 export function BlogPage() {
   const { t, isLight, themeTokens } = useTheme();
@@ -31,20 +35,36 @@ export function BlogPage() {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(isAdmin ? 'Official Guide' : 'Tips & Tricks');
   const [content, setContent] = useState('');
-  const [coverPhoto, setCoverPhoto] = useState(null);
+  const [coverPhotos, setCoverPhotos] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
+  const [expandedContent, setExpandedContent] = useState({});
+  const [profileTarget, setProfileTarget] = useState(null);
   const photoInputRef = useRef(null);
 
   const handleCoverPhotoChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setCoverPhoto(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const remaining = Math.max(0, MAX_BLOG_PHOTOS - coverPhotos.length);
+    const toAdd = files.slice(0, remaining);
+    toAdd.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setCoverPhotos((prev) => {
+            if (prev.length >= MAX_BLOG_PHOTOS) return prev;
+            return [...prev, reader.result];
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    // reset the input so selecting the same file again re-triggers onChange
+    e.target.value = '';
+  };
+
+  const removeCoverPhoto = (idx) => {
+    setCoverPhotos((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handlePublish = (e) => {
@@ -54,13 +74,22 @@ export function BlogPage() {
       title: title || 'Smoke-Free Health Update',
       category,
       content: content || 'Every clean day helps your lungs recover and glow.',
-      image: coverPhoto,
+      image: coverPhotos[0] || null,
+      images: coverPhotos,
     });
     setTitle('');
     setContent('');
-    setCoverPhoto(null);
+    setCoverPhotos([]);
     setShowEditor(false);
   };
+
+  const openProfile = (blog) =>
+    setProfileTarget({
+      author: blog.author,
+      avatar: blog.authorAvatar,
+      isYou: blog.author.includes(userName),
+      authorRole: blog.authorRole,
+    });
 
   const filteredBlogs = blogs.filter((b) =>
     selectedCategoryFilter === 'All' ? true : b.category === selectedCategoryFilter
@@ -149,36 +178,55 @@ export function BlogPage() {
             className={`w-full rounded-3xl border ${themeTokens.inputSurface} p-5 text-sm sm:text-base focus:outline-none resize-y`}
           />
 
-          {coverPhoto && (
-            <div className="relative w-full max-h-64 rounded-3xl overflow-hidden border border-[#5FB032]/40">
-              <img src={coverPhoto} alt="Blog cover preview" className="w-full h-60 object-cover" />
-              <button
-                type="button"
-                onClick={() => setCoverPhoto(null)}
-                className="absolute top-3 right-3 rounded-full bg-black/80 text-white text-xs font-bold px-3.5 py-1.5 hover:bg-black"
-              >
-                ✕ {t.blog.removePhotoBtn}
-              </button>
+          {coverPhotos.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {coverPhotos.map((src, idx) => (
+                <div
+                  key={idx}
+                  className="relative rounded-2xl overflow-hidden border border-[#5FB032]/40 aspect-[4/3]"
+                >
+                  <img
+                    src={src}
+                    alt={`Blog photo ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Remove photo ${idx + 1}`}
+                    onClick={() => removeCoverPhoto(idx)}
+                    className="absolute top-2 right-2 rounded-full bg-black/80 text-white text-xs font-bold w-6 h-6 flex items-center justify-center hover:bg-black"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div>
+            <div className="flex items-center gap-3 flex-wrap">
               <input
                 ref={photoInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleCoverPhotoChange}
                 className="hidden"
               />
               <button
                 type="button"
+                disabled={coverPhotos.length >= MAX_BLOG_PHOTOS}
                 onClick={() => photoInputRef.current?.click()}
-                className={`px-5 py-2.5 text-xs sm:text-sm inline-flex items-center gap-2 ${themeTokens.secondaryBtn}`}
+                className={`px-5 py-2.5 text-xs sm:text-sm inline-flex items-center gap-2 ${themeTokens.secondaryBtn} ${
+                  coverPhotos.length >= MAX_BLOG_PHOTOS ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <CameraIcon className="w-4 h-4 text-[#5FB032]" />
                 <span>{t.blog.uploadPhotoBtn}</span>
               </button>
+              <span className={`text-[11px] sm:text-xs ${themeTokens.mutedText}`}>
+                {coverPhotos.length}/{MAX_BLOG_PHOTOS}
+              </span>
             </div>
 
             <button
@@ -220,6 +268,16 @@ export function BlogPage() {
         {filteredBlogs.map((blog) => {
           const canDelete = isAdmin || blog.author.includes(userName);
           const commentText = commentInputs[blog.id] || '';
+          const blogComments = blog.comments || [];
+          const commentsExpanded = !!expandedComments[blog.id];
+          const visibleComments = commentsExpanded
+            ? blogComments
+            : blogComments.slice(0, INITIAL_COMMENT_COUNT);
+          const contentExpanded = !!expandedContent[blog.id];
+          const isLongContent = (blog.content || '').length > LONG_CONTENT_THRESHOLD;
+          const blogPhotos = Array.isArray(blog.images) && blog.images.length > 0
+            ? blog.images
+            : (blog.image ? [blog.image] : []);
 
           return (
             <article
@@ -230,13 +288,18 @@ export function BlogPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3.5">
                   <div className="relative group">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-[#5FB032]/40 p-1 overflow-hidden">
+                    <button
+                      type="button"
+                      aria-label={`View ${blog.author} profile`}
+                      onClick={() => openProfile(blog)}
+                      className="block w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-[#5FB032]/40 p-1 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5FB032] cursor-pointer"
+                    >
                       <img
                         src={blog.authorAvatar || ASSETS.avatar}
                         alt={blog.author}
                         className="w-full h-full rounded-full object-cover"
                       />
-                    </div>
+                    </button>
                     <button
                       type="button"
                       title={t.blog.reportAvatar}
@@ -256,7 +319,13 @@ export function BlogPage() {
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-base sm:text-lg font-bold">{blog.author}</span>
+                      <button
+                        type="button"
+                        onClick={() => openProfile(blog)}
+                        className="text-base sm:text-lg font-bold hover:text-[#5FB032] transition text-left cursor-pointer"
+                      >
+                        {blog.author}
+                      </button>
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                           blog.authorRole === 'admin'
@@ -278,23 +347,62 @@ export function BlogPage() {
                 </span>
               </div>
 
-              {/* Blog Title & Optional Uploaded Photo */}
+              {/* Blog Title, Photos & Content */}
               <div>
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-3">
                   {blog.title}
                 </h2>
-                {blog.image && (
-                  <div className="w-full max-h-80 rounded-3xl overflow-hidden border border-white/15 mb-4">
-                    <img
-                      src={blog.image}
-                      alt={blog.title}
-                      className="w-full h-72 object-cover"
-                    />
+                {blogPhotos.length > 0 && (
+                  <div
+                    className={`mb-4 gap-3 ${
+                      blogPhotos.length === 1
+                        ? 'block'
+                        : 'grid grid-cols-2 sm:grid-cols-3'
+                    }`}
+                  >
+                    {blogPhotos.map((src, idx) => (
+                      <div
+                        key={idx}
+                        className={`rounded-3xl overflow-hidden border border-white/15 ${
+                          blogPhotos.length === 1 ? 'w-full max-h-80' : 'aspect-[4/3]'
+                        }`}
+                      >
+                        <img
+                          src={src}
+                          alt={`${blog.title} photo ${idx + 1}`}
+                          className={`w-full object-cover ${
+                            blogPhotos.length === 1 ? 'h-72' : 'h-full'
+                          }`}
+                        />
+                      </div>
+                    ))}
                   </div>
                 )}
-                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                <p
+                  className={`text-sm sm:text-base leading-relaxed whitespace-pre-line ${
+                    isLongContent && !contentExpanded
+                      ? 'line-clamp-4'
+                      : ''
+                  }`}
+                >
                   {blog.content}
                 </p>
+                {isLongContent && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedContent((prev) => ({
+                        ...prev,
+                        [blog.id]: !contentExpanded,
+                      }))
+                    }
+                    className={`mt-2 text-xs sm:text-sm font-bold transition hover:underline ${
+                      isLight ? 'text-[#3A7B18]' : 'text-[#5FB032]'
+                    }`}
+                  >
+                    {contentExpanded ? t.common.seeLess : t.common.seeMore}
+                  </button>
+                )}
               </div>
 
               {/* Actions Bar: Like, Report Blog, Delete Blog */}
@@ -351,10 +459,10 @@ export function BlogPage() {
               {/* Blog Comments Section */}
               <div className={`rounded-2xl sm:rounded-3xl border ${themeTokens.subCardSurface} p-4 sm:p-5 flex flex-col gap-3.5`}>
                 <div className="text-xs sm:text-sm font-bold text-[#5FB032]">
-                  {t.blog.commentsTitle} ({(blog.comments || []).length})
+                  {t.blog.commentsTitle} ({blogComments.length})
                 </div>
 
-                {(blog.comments || []).map((com) => (
+                {visibleComments.map((com) => (
                   <div
                     key={com.id}
                     className={`rounded-2xl border px-4 py-2.5 flex items-start justify-between gap-3 ${
@@ -412,6 +520,25 @@ export function BlogPage() {
                   </div>
                 ))}
 
+                {blogComments.length > INITIAL_COMMENT_COUNT && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedComments((prev) => ({
+                        ...prev,
+                        [blog.id]: !commentsExpanded,
+                      }))
+                    }
+                    className={`self-start text-xs sm:text-sm font-bold transition hover:underline ${
+                      isLight ? 'text-[#3A7B18]' : 'text-[#5FB032]'
+                    }`}
+                  >
+                    {commentsExpanded
+                      ? t.common.seeLess
+                      : `${t.common.seeMore} (${blogComments.length - INITIAL_COMMENT_COUNT})`}
+                  </button>
+                )}
+
                 {/* Add Comment Input */}
                 <form
                   onSubmit={(e) => {
@@ -443,6 +570,16 @@ export function BlogPage() {
           );
         })}
       </div>
+
+      {profileTarget && (
+        <ProfileModal
+          author={profileTarget.author}
+          avatar={profileTarget.avatar}
+          isYou={profileTarget.isYou}
+          authorRole={profileTarget.authorRole}
+          onClose={() => setProfileTarget(null)}
+        />
+      )}
     </div>
   );
 }
