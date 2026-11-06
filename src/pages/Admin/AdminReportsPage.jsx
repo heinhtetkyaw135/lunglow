@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlagReportIcon,
   TrashCanIcon,
@@ -10,11 +10,70 @@ import { ASSETS } from '../../types';
 import { useTheme } from '../../hooks/useTheme';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
+// Small modal that shows the reported profile image when an admin clicks
+// "Details" on a profile-image report.
+function ProfileImagePreviewModal({ rep, imageSrc, onClose }) {
+  const { themeTokens, isLight, t } = useTheme();
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-page-enter"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`w-full max-w-md rounded-[32px] border p-6 sm:p-8 shadow-2xl animate-pop text-center ${
+          isLight ? 'border-[#2E5A1C]/25 bg-white text-[#132211]' : 'border-white/25 bg-[#141814] text-white'
+        }`}
+      >
+        <div className="w-28 h-28 rounded-full border-[3px] border-[#FF3B30]/60 p-1 overflow-hidden mx-auto mb-4 shadow-md">
+          <img
+            src={imageSrc}
+            alt={rep.targetAuthor}
+            className="w-full h-full rounded-full object-cover"
+          />
+        </div>
+        <h3 className="text-xl font-bold">{rep.targetAuthor}</h3>
+        <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF3B30]/20 border border-[#FF3B30] text-[#FF3B30] px-3 py-1 text-[11px] font-extrabold">
+            <FlagReportIcon className="w-3 h-3" />
+            {t.reportModal.targetTypes['profile-image']}
+          </span>
+        </div>
+        <p className={`mt-3 text-xs sm:text-sm ${themeTokens.mutedText}`}>
+          <strong>{t.admin.reasonLabel}</strong> <span className="text-[#CABA3A] font-semibold">{rep.reason}</span>
+        </p>
+        <p className={`mt-1 text-xs sm:text-sm ${themeTokens.mutedText}`}>
+          <strong>{t.admin.reportedBy}</strong> {rep.reportedBy} • {rep.createdAt}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className={`mt-6 w-full py-3 ${themeTokens.secondaryBtn}`}
+        >
+          {t.common.close}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function AdminReportsPage() {
   const { t, isLight, themeTokens } = useTheme();
-  const { reports, managedUsers, handleAdminResolveReport } = useLunglowData();
+  const { reports, managedUsers, handleAdminResolveReport, setPage, setReportFocusId } = useLunglowData();
   const [reportFilter, setReportFilter] = useState('all');
   const [expandedId, setExpandedId] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null); // rep object for profile-image preview
 
   const filteredReports = reports.filter((r) => reportFilter === 'all' || r.targetType === reportFilter);
 
@@ -37,6 +96,17 @@ export function AdminReportsPage() {
   const findReportedAvatar = (rep) => {
     const user = managedUsers.find((u) => u.id === rep.targetId || u.name === rep.targetAuthor);
     return user?.avatar || ASSETS.avatar;
+  };
+
+  // Post / blog / comment reports open the related feed with the item
+  // highlighted; profile-image reports open the photo preview modal.
+  const handleShowDetails = (rep) => {
+    if (rep.targetType === 'profile-image') {
+      setAvatarPreview(rep);
+      return;
+    }
+    setReportFocusId(rep.id);
+    setPage('admin-feed');
   };
 
   return (
@@ -140,11 +210,18 @@ export function AdminReportsPage() {
                     <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                       <button
                         type="button"
-                        onClick={() => setExpandedId(expanded ? null : rep.id)}
+                        onClick={() => handleShowDetails(rep)}
                         className={`px-4 py-2.5 text-xs sm:text-sm inline-flex items-center gap-1.5 ${themeTokens.secondaryBtn}`}
                       >
                         <EyeIcon className="w-4 h-4" />
-                        {expanded ? 'Less' : 'Details'}
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(expanded ? null : rep.id)}
+                        className={`px-4 py-2.5 text-xs sm:text-sm ${themeTokens.secondaryBtn}`}
+                      >
+                        {expanded ? 'Less' : 'Meta'}
                       </button>
                       <button
                         type="button"
@@ -188,6 +265,14 @@ export function AdminReportsPage() {
           </div>
         )}
       </div>
+
+      {avatarPreview && (
+        <ProfileImagePreviewModal
+          rep={avatarPreview}
+          imageSrc={findReportedAvatar(avatarPreview)}
+          onClose={() => setAvatarPreview(null)}
+        />
+      )}
     </div>
   );
 }

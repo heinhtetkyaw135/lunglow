@@ -413,6 +413,7 @@ export const I18N = {
       menu: {
         overview: 'Overview',
         reports: 'Report Queue',
+        feed: 'Community & Blog Feed',
         blog: 'Upload Blog',
         analytics: 'Analytics',
         challenges: 'Challenges',
@@ -421,6 +422,7 @@ export const I18N = {
       menuShort: {
         overview: 'Home',
         reports: 'Reports',
+        feed: 'Feed',
         blog: 'Blog',
         analytics: 'Stats',
         challenges: 'Challenge',
@@ -440,6 +442,19 @@ export const I18N = {
       reportsPage: {
         title: 'Reported Content Queue',
         subtitle: 'Review community-flagged blogs, posts, comments and profile photos. Delete harmful items or dismiss false flags.',
+      },
+      feedPage: {
+        title: 'Community & Blog Feed',
+        subtitle: 'Live view of every community post and blog article as users see it. Reported items are highlighted for quick moderation.',
+        communityFeed: 'Community Feed',
+        blogFeed: 'Blog Feed',
+        all: 'All',
+        reportedBadge: 'Reported',
+        reportedComment: 'Reported comment',
+        reportedHighlight: 'Reported content — shown exactly as users see it.',
+        parentContext: 'Reported comment lives inside this thread.',
+        emptyPosts: 'No community posts yet.',
+        emptyBlogs: 'No blog articles yet.',
       },
       analyticsPage: {
         title: 'Analytics & Data Export',
@@ -947,6 +962,7 @@ export const I18N = {
       menu: {
         overview: 'အကျဉ်းချုပ်',
         reports: 'တိုင်ကြားချက်များ',
+        feed: 'Community & ဘလော့ဂ် Feed',
         blog: 'ဘလော့ဂ်တင်ရန်',
         analytics: 'စစ်ဆေးချက်များ',
         challenges: 'စိန်ခေါ်မှုများ',
@@ -955,6 +971,7 @@ export const I18N = {
       menuShort: {
         overview: 'ပင်မ',
         reports: 'တိုင်ကြား',
+        feed: 'Feed',
         blog: 'ဘလော့ဂ်',
         analytics: 'စာရင်းအင်း',
         challenges: 'စိန်ခေါ်မှု',
@@ -974,6 +991,19 @@ export const I18N = {
       reportsPage: {
         title: 'တိုင်ကြားထားသော အကြောင်းအရာများ',
         subtitle: 'အသိုင်းအဝိုင်းမှ တိုင်ကြားထားသော ဘလော့ဂ်၊ ပို့စ်၊ မှတ်ချက်နှင့် ပရိုဖိုင်ပုံများကို စစ်ဆေးပါ။',
+      },
+      feedPage: {
+        title: 'Community & ဘလော့ဂ် Feed',
+        subtitle: 'သုံးစွဲသူများ မြင်ရသည့်အတိုင်း community ပို့စ်နှင့် ဘလော့ဂ်ဆောင်းပါးအားလုံးကို ကြည့်ရှုပါ။ တိုင်ကြားထားသော အကြောင်းအရာများကို အသဲရောင်ဖြင့် အလင်းပြထားသည်။',
+        communityFeed: 'Community Feed',
+        blogFeed: 'ဘလော့ဂ် Feed',
+        all: 'အားလုံး',
+        reportedBadge: 'တိုင်ကြားထား',
+        reportedComment: 'တိုင်ကြားထားသော မှတ်ချက်',
+        reportedHighlight: 'တိုင်ကြားထားသော အကြောင်းအရာ — သုံးစွဲသူများ မြင်ရသည့်အတိုင်း ပြသထားသည်။',
+        parentContext: 'တိုင်ကြားထားသော မှတ်ချက်သည် ဤ thread ထဲတွင် ရှိသည်။',
+        emptyPosts: 'Community ပို့စ် မရှိသေးပါ။',
+        emptyBlogs: 'ဘလော့ဂ်ဆောင်းပါး မရှိသေးပါ။',
       },
       analyticsPage: {
         title: 'စစ်ဆေးချက်နှင့် ဒေတာထုတ်ယူခြင်း',

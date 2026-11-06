@@ -28,6 +28,7 @@ import { CommunityFeedPage } from './pages/Community/CommunityFeedPage';
 import { BlogPage } from './pages/Blog/BlogPage';
 import { AdminPage } from './pages/Admin/AdminPage';
 import { AdminReportsPage } from './pages/Admin/AdminReportsPage';
+import { AdminCommunityBlogFeedPage } from './pages/Admin/AdminCommunityBlogFeedPage';
 import { AdminBlogPage } from './pages/Admin/AdminBlogPage';
 import { AdminAnalyticsPage } from './pages/Admin/AdminAnalyticsPage';
 import { AdminChallengesPage } from './pages/Admin/AdminChallengesPage';
@@ -54,6 +55,7 @@ const USER_PAGES = [
 const ADMIN_PAGES = [
   'admin',
   'admin-reports',
+  'admin-feed',
   'admin-blog',
   'admin-analytics',
   'admin-challenges',
@@ -95,6 +97,7 @@ function AppRoutes() {
           <AdminLayout activePage={page}>
             {page === 'admin' && <AdminPage />}
             {page === 'admin-reports' && <AdminReportsPage />}
+            {page === 'admin-feed' && <AdminCommunityBlogFeedPage />}
             {page === 'admin-blog' && <AdminBlogPage />}
             {page === 'admin-analytics' && <AdminAnalyticsPage />}
             {page === 'admin-challenges' && <AdminChallengesPage />}

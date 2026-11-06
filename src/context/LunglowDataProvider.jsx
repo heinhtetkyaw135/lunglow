@@ -43,7 +43,7 @@ export function LunglowDataProvider({ children }) {
     return 'landing';
   });
 
-  const ADMIN_PAGE_IDS = ['admin', 'admin-reports', 'admin-blog', 'admin-analytics', 'admin-challenges', 'admin-requests'];
+  const ADMIN_PAGE_IDS = ['admin', 'admin-reports', 'admin-feed', 'admin-blog', 'admin-analytics', 'admin-challenges', 'admin-requests'];
 
   const pagePath = useCallback((nextPage) => {
     const routes = {
@@ -255,6 +255,7 @@ export function LunglowDataProvider({ children }) {
   const [managedUsers, setManagedUsers] = useState(INITIAL_MANAGED_USERS);
   const [reports, setReports] = useState(INITIAL_REPORTS);
   const [reportModalTarget, setReportModalTarget] = useState(null);
+  const [reportFocusId, setReportFocusId] = useState(null);
 
   // Admin-provided Challenges (shared between admin dashboard & user site)
   const [challenges, setChallenges] = useState(INITIAL_CHALLENGES);
@@ -941,6 +942,8 @@ export function LunglowDataProvider({ children }) {
         handleAddPostComment,
         handleDeletePostComment,
         reports,
+        reportFocusId,
+        setReportFocusId,
         reportModalTarget,
         handleOpenReportModal,
         handleCloseReportModal,

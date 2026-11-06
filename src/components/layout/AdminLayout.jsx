@@ -3,6 +3,7 @@ import {
   LunglowLogo,
   NavHomeIcon,
   FlagReportIcon,
+  NavChatIcon,
   NavBlogIcon,
   ChartLineIcon,
   TrophyIcon,
@@ -19,6 +20,7 @@ import { useLunglowData } from '../../hooks/useLunglowData';
 const ADMIN_NAV = [
   { id: 'admin', icon: NavHomeIcon },
   { id: 'admin-reports', icon: FlagReportIcon, badge: 'reports' },
+  { id: 'admin-feed', icon: NavChatIcon },
   { id: 'admin-blog', icon: NavBlogIcon },
   { id: 'admin-analytics', icon: ChartLineIcon },
   { id: 'admin-challenges', icon: TrophyIcon, badge: 'challenges' },
