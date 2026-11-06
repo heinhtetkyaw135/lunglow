@@ -30,6 +30,12 @@ export const I18N = {
       dark: 'Dark',
       light: 'Light',
     },
+    notif: {
+      bellLabel: 'Notifications',
+      panelTitle: 'Notifications',
+      clearAll: 'Clear all',
+      empty: 'You’re all caught up — no notifications yet.',
+    },
     landing: {
       line1Prefix: 'Every ',
       line1Highlight: 'Clean',
@@ -103,8 +109,9 @@ export const I18N = {
     goal: {
       bannerLine1: 'Avoided cigarettes and',
       bannerLine2: 'saved money in this month',
+      avoidedSaved: 'Avoided and Saved',
       sectionTitle: 'Goal to buy',
-      goalLabel: 'Goal',
+      goalLabel: 'Goal and Price',
       priceLabel: 'Price ($)',
       setGoalBtn: 'Set Goal',
     },
@@ -609,8 +616,9 @@ export const I18N = {
     goal: {
       bannerLine1: 'ယခုလအတွင်း ရှောင်ကြဉ်နိုင်သော ဆေးလိပ်နှင့်',
       bannerLine2: 'စုဆောင်းမိသောငွေပမာဏ',
+      avoidedSaved: 'ရှောင်ကြဉ်နိုင်ခြင်းနှင့် စုဆောင်းမိခြင်း',
       sectionTitle: 'ဝယ်ယူရန် ရည်မှန်းချက်ပန်းတိုင်',
-      goalLabel: 'ရည်မှန်းချက်ပစ္စည်း',
+      goalLabel: 'ရည်မှန်းချက်နှင့် တန်ဖိုး',
       priceLabel: 'တန်ဖိုး ($)',
       setGoalBtn: 'ပန်းတိုင်သတ်မှတ်မည်',
     },

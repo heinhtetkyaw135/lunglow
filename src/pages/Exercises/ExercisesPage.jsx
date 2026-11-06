@@ -1,16 +1,19 @@
 import React from 'react';
 import { ArrowUpRightIcon } from '../../components/common/Icons';
+import { ASSETS } from '../../types';
 import { useTheme } from '../../hooks/useTheme';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
 export function ExercisesPage() {
-  const { t, themeTokens } = useTheme();
+  const { t, themeTokens, isLight } = useTheme();
   const { breathingTimer, walkingTimer, setPage } = useLunglowData();
 
   const items = [
     {
       line1: t.exercises.breathingCardTitle1,
       line2: t.exercises.breathingCardTitle2,
+      image: ASSETS.breathingStatic,
+      imgAlt: t.exercises.breathingHeader,
       onClick: () => {
         breathingTimer.reset();
         setPage('breathing');
@@ -19,6 +22,8 @@ export function ExercisesPage() {
     {
       line1: t.exercises.walkingCardTitle1,
       line2: t.exercises.walkingCardTitle2,
+      image: ASSETS.walkingStatic,
+      imgAlt: t.exercises.walkingHeader,
       onClick: () => {
         walkingTimer.reset();
         setPage('walking');
@@ -27,11 +32,13 @@ export function ExercisesPage() {
     {
       line1: t.games.memoryCardTitle1,
       line2: t.games.memoryCardTitle2,
+      emoji: '🧩',
       onClick: () => setPage('memory-game'),
     },
     {
       line1: t.games.tttCardTitle1,
       line2: t.games.tttCardTitle2,
+      emoji: '❌⭕',
       onClick: () => setPage('tictactoe-game'),
     },
   ];
@@ -41,13 +48,35 @@ export function ExercisesPage() {
       {items.map((item, idx) => (
         <div
           key={idx}
-          className={`rounded-3xl sm:rounded-[40px] border ${themeTokens.cardSurface} px-6 sm:px-10 py-9 sm:py-14 flex flex-col sm:flex-row sm:items-center justify-between gap-6`}
+          className={`rounded-3xl sm:rounded-[40px] border ${themeTokens.cardSurface} p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6`}
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
-            {item.line1}
-            <br />
-            {item.line2}
-          </h2>
+          <div className="flex items-center gap-5 sm:gap-6 min-w-0">
+            <div
+              className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden flex items-center justify-center shrink-0 border shadow-inner ${
+                isLight
+                  ? 'border-[#2E5A1C]/15 bg-[#F2F7EF]'
+                  : 'border-white/15 bg-[#161A16]'
+              }`}
+            >
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.imgAlt}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl sm:text-5xl" aria-hidden="true">
+                  {item.emoji}
+                </span>
+              )}
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight min-w-0">
+              {item.line1}
+              <br />
+              {item.line2}
+            </h2>
+          </div>
 
           <button
             type="button"

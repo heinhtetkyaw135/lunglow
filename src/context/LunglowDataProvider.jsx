@@ -339,6 +339,11 @@ export function LunglowDataProvider({ children }) {
       createdAt: 'Just now',
     };
     setUserRequests((prev) => [newReq, ...prev]);
+    pushNotification({
+      title: lang === 'my' ? 'တောင်းဆိုချက် အသစ်' : 'New User Request',
+      body: subject.trim() || (lang === 'my' ? 'တောင်းဆိုချက် တစ်ခု ရောက်ရှိပါသည်' : 'A user sent a new request.'),
+      kind: 'request',
+    });
     showToast(
       lang === 'my'
         ? 'သင့်တောင်းဆိုချက်ကို Admin ထံ ပေးပို့ပြီးပါပြီ!'
@@ -368,6 +373,11 @@ export function LunglowDataProvider({ children }) {
   const handlePublishBroadcast = (message) => {
     if (!message.trim()) return;
     setBroadcast({ message: message.trim(), publishedAt: 'Just now' });
+    pushNotification({
+      title: lang === 'my' ? 'ကြေညာချက် အသစ်' : 'New Broadcast',
+      body: message.trim(),
+      kind: 'broadcast',
+    });
     showToast(lang === 'my' ? 'ကြေညာချက်ကို သုံးစွဲသူအားလုံးထံ ပေးပို့ပြီးပါပြီ!' : 'Broadcast pushed to all user dashboards!');
   };
 
@@ -375,6 +385,23 @@ export function LunglowDataProvider({ children }) {
     setBroadcast(null);
     showToast(lang === 'my' ? 'ကြေညာချက် ရပ်တန့်ပြီးပါပြီ' : 'Broadcast cleared');
   };
+
+  // Notification center — shared for user & admin dashboards
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const pushNotification = useCallback(({ title, body, kind = 'info' }) => {
+    setNotifications((prev) => [
+      { id: `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title, body, kind, read: false, time: 'Just now' },
+      ...prev,
+    ].slice(0, 30));
+  }, []);
+
+  const unreadNotifCount = notifications.filter((n) => !n.read).length;
+  const markAllNotifsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, []);
+  const clearNotifications = useCallback(() => setNotifications([]), []);
 
   // Open Report Modal for blog, post, comment, or profile-image
   const handleOpenReportModal = (targetObj) => {
@@ -400,6 +427,11 @@ export function LunglowDataProvider({ children }) {
     };
     setReports((prev) => [newReport, ...prev]);
     setReportModalTarget(null);
+    pushNotification({
+      title: lang === 'my' ? 'တိုင်ကြားချက် အသစ်' : 'New Report Submitted',
+      body: lang === 'my' ? 'သုံးစွဲသူတစ်ဦးမှ အကြောင်းအရာ တိုင်းကြားထားသည်' : `A user reported ${reportModalTarget.targetType} content.`,
+      kind: 'report',
+    });
     showToast(t.reportModal.submittedToast);
   };
 
@@ -912,6 +944,13 @@ export function LunglowDataProvider({ children }) {
         broadcast,
         handlePublishBroadcast,
         handleClearBroadcast,
+        notifications,
+        notifOpen,
+        setNotifOpen,
+        pushNotification,
+        unreadNotifCount,
+        markAllNotifsRead,
+        clearNotifications,
         handlePhotoUpload,
         handleSaveProfileName,
         metrics,

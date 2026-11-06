@@ -31,33 +31,39 @@ export function GoalPage() {
           {t.goal.bannerLine2}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full sm:w-auto">
-          <div
-            className={`h-36 sm:w-44 sm:h-44 rounded-3xl sm:rounded-[36px] border ${themeTokens.subCardSurface} flex flex-col items-center justify-center gap-2 sm:gap-3 px-4`}
-          >
-            <SmokingCigaretteIcon className="w-16 h-12 sm:w-20 sm:h-14" />
-            <div className="text-3xl sm:text-5xl font-bold">
-              {metrics.monthAvoided}
+        <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full sm:w-auto">
+            <div
+              className={`h-36 sm:w-44 sm:h-44 rounded-3xl sm:rounded-[36px] border ${themeTokens.subCardSurface} flex flex-col items-center justify-center gap-2 sm:gap-3 px-4`}
+            >
+              <SmokingCigaretteIcon className="w-16 h-12 sm:w-20 sm:h-14" />
+              <div className="text-3xl sm:text-5xl font-bold">
+                {metrics.monthAvoided}
+              </div>
+            </div>
+
+            <div
+              className={`h-36 sm:w-44 sm:h-44 rounded-3xl sm:rounded-[36px] border ${themeTokens.subCardSurface} flex flex-col items-center justify-center gap-2 sm:gap-3 px-4`}
+            >
+              <DollarCircleIcon className="w-12 h-12 sm:w-14 sm:h-14" />
+              <div className="text-3xl sm:text-5xl font-bold">
+                {metrics.monthSavedMoney}$
+              </div>
             </div>
           </div>
 
-          <div
-            className={`h-36 sm:w-44 sm:h-44 rounded-3xl sm:rounded-[36px] border ${themeTokens.subCardSurface} flex flex-col items-center justify-center gap-2 sm:gap-3 px-4`}
-          >
-            <DollarCircleIcon className="w-12 h-12 sm:w-14 sm:h-14" />
-            <div className="text-3xl sm:text-5xl font-bold">
-              {metrics.monthSavedMoney}$
-            </div>
-          </div>
+          <span className="text-sm sm:text-base font-semibold tracking-wide opacity-80">
+            {t.goal.avoidedSaved}
+          </span>
         </div>
       </div>
 
-      <div>
+      <div className="flex-1">
         <h2 className="text-2xl sm:text-4xl font-bold mb-5">
           {t.goal.sectionTitle}
         </h2>
 
-        <div className="flex flex-col gap-3.5 sm:gap-4">
+        <div className="flex flex-col gap-3.5 sm:gap-4 pb-6">
           {goals.map((g) => {
             const pct = Math.min(
               100,
@@ -94,7 +100,8 @@ export function GoalPage() {
         </div>
       </div>
 
-      <div className="mt-auto pt-10">
+      {/* "Goal and Price" textbox + "Set Goal" button — pinned to the bottom of the page */}
+      <div className="sticky bottom-20 lg:bottom-4 z-30 pt-4">
         <form
           onSubmit={handleAddGoal}
           className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-5"
@@ -103,26 +110,25 @@ export function GoalPage() {
             <label className="text-xs sm:text-sm font-medium pl-1">
               {t.goal.goalLabel}
             </label>
-            <input
-              type="text"
-              value={newGoalTitle}
-              onChange={(e) => setNewGoalTitle(e.target.value)}
-              placeholder="laptop"
-              className={`h-11 sm:h-12 rounded-full border ${themeTokens.inputSurface} px-5 text-sm sm:text-base focus:outline-none focus:border-[#CABA3A]`}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5 w-full sm:w-56">
-            <label className="text-xs sm:text-sm font-medium pl-1">
-              {t.goal.priceLabel}
-            </label>
-            <div className={`h-11 sm:h-12 rounded-full border ${themeTokens.inputSurface} px-5 flex items-center justify-between`}>
+            <div
+              className={`h-12 sm:h-14 rounded-full border ${themeTokens.inputSurface} pl-5 pr-3 flex items-center gap-3 shadow-lg`}
+            >
+              <input
+                type="text"
+                value={newGoalTitle}
+                onChange={(e) => setNewGoalTitle(e.target.value)}
+                placeholder="laptop"
+                className="bg-transparent text-sm sm:text-base flex-1 min-w-0 focus:outline-none"
+              />
+              <span className="w-px self-stretch my-3 shrink-0 bg-current opacity-20" />
               <input
                 type="number"
                 min="1"
                 value={newGoalPrice}
                 onChange={(e) => setNewGoalPrice(e.target.value)}
-                className="bg-transparent text-sm sm:text-base w-full focus:outline-none"
+                placeholder="2000"
+                aria-label={t.goal.priceLabel}
+                className="bg-transparent text-sm sm:text-base w-20 sm:w-24 min-w-0 focus:outline-none text-right"
               />
               <NumberStepperChevrons
                 onIncrement={() => setNewGoalPrice((v) => Number(v || 0) + 50)}
@@ -135,7 +141,7 @@ export function GoalPage() {
 
           <button
             type="submit"
-            className="h-11 sm:h-12 bg-[#CABA3A] hover:brightness-110 active:scale-95 transition text-black font-semibold text-sm sm:text-base rounded-full px-8 inline-flex items-center justify-center gap-2 shrink-0 shadow-lg"
+            className="h-12 sm:h-14 bg-[#CABA3A] hover:brightness-110 active:scale-95 transition text-black font-semibold text-sm sm:text-base rounded-full px-8 inline-flex items-center justify-center gap-2 shrink-0 shadow-lg"
           >
             <span>{t.goal.setGoalBtn}</span>
             <ArrowUpRightIcon className="w-4 h-4" />
