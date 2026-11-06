@@ -1,29 +1,75 @@
-import React, { useState } from 'react';
-import { TrophyIcon, PauseIcon, PlayIcon, TrashCanIcon, UsersGroupIcon, SparklesIcon } from '../../components/common/Icons';
+import React, { useRef, useState } from 'react';
+import {
+  TrophyIcon,
+  PauseIcon,
+  PlayIcon,
+  TrashCanIcon,
+  UsersGroupIcon,
+  SparklesIcon,
+  CameraIcon,
+} from '../../components/common/Icons';
+import { ChallengeDetailModal } from '../../components/common/ChallengeDetailModal';
 import { CountUp } from '../../components/common/Charts';
 import { useTheme } from '../../hooks/useTheme';
 import { useLunglowData } from '../../hooks/useLunglowData';
 
 export function AdminChallengesPage() {
   const { t, isLight, themeTokens } = useTheme();
-  const { challenges, handleAdminAddChallenge, handleAdminToggleChallenge, handleAdminDeleteChallenge } = useLunglowData();
+  const {
+    challenges,
+    handleAdminAddChallenge,
+    handleAdminToggleChallenge,
+    handleAdminDeleteChallenge,
+    handleAdminUpdateChallengeCover,
+  } = useLunglowData();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [reward, setReward] = useState('');
   const [days, setDays] = useState(7);
+  const [coverPhoto, setCoverPhoto] = useState(null);
+
+  // Detail modal + cover replacement for existing challenges
+  const [detailTarget, setDetailTarget] = useState(null);
+  const [coverReplaceId, setCoverReplaceId] = useState(null);
+  const formPhotoRef = useRef(null);
+  const cardPhotoRef = useRef(null);
 
   const liveCount = challenges.filter((c) => c.active).length;
   const totalParticipants = challenges.reduce((s, c) => s + c.participants, 0);
 
+  const readImageFile = (file, onLoaded) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') onLoaded(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFormPhotoChange = (e) => {
+    readImageFile(e.target.files?.[0], setCoverPhoto);
+    e.target.value = '';
+  };
+
+  const handleCardPhotoChange = (e) => {
+    const challengeId = coverReplaceId;
+    readImageFile(e.target.files?.[0], (src) => {
+      if (challengeId) handleAdminUpdateChallengeCover(challengeId, src);
+    });
+    setCoverReplaceId(null);
+    e.target.value = '';
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    handleAdminAddChallenge({ title, description, reward, days });
+    handleAdminAddChallenge({ title, description, reward, days, cover: coverPhoto });
     setTitle('');
     setDescription('');
     setReward('');
     setDays(7);
+    setCoverPhoto(null);
   };
 
   return (
@@ -91,6 +137,37 @@ export function AdminChallengesPage() {
             className={`h-12 rounded-full border ${themeTokens.inputSurface} px-5 text-sm focus:outline-none`}
           />
         </div>
+
+        {/* Cover photo upload */}
+        <input
+          ref={formPhotoRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFormPhotoChange}
+          className="hidden"
+        />
+        {coverPhoto ? (
+          <div className="relative w-full max-h-60 rounded-3xl overflow-hidden border border-[#5FB032]/40">
+            <img src={coverPhoto} alt="Challenge cover preview" className="w-full h-52 object-cover" />
+            <button
+              type="button"
+              onClick={() => setCoverPhoto(null)}
+              className="absolute top-3 right-3 rounded-full bg-black/80 text-white text-xs font-bold px-3 py-1"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => formPhotoRef.current?.click()}
+            className={`self-start px-5 py-2.5 text-xs sm:text-sm inline-flex items-center gap-2 ${themeTokens.secondaryBtn}`}
+          >
+            <CameraIcon className="w-4 h-4 text-[#5FB032]" />
+            <span>{t.admin.challengesPage.uploadCoverBtn}</span>
+          </button>
+        )}
+
         <button type="submit" className={`self-end px-8 py-3 text-sm sm:text-base ${themeTokens.primaryBtn}`}>
           {t.admin.challengesPage.launchBtn}
         </button>
@@ -118,6 +195,17 @@ export function AdminChallengesPage() {
                 >
                   {c.active ? `● ${t.admin.challengesPage.statusLive}` : `‖ ${t.admin.challengesPage.statusPaused}`}
                 </span>
+                <button
+                  type="button"
+                  title={c.cover ? t.admin.challengesPage.changeCoverBtn : t.admin.challengesPage.uploadCoverBtn}
+                  onClick={() => {
+                    setCoverReplaceId(c.id);
+                    cardPhotoRef.current?.click();
+                  }}
+                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center shadow hover:bg-black transition"
+                >
+                  <CameraIcon className="w-4 h-4" />
+                </button>
               </div>
 
               <div className="flex-1 p-5 flex flex-col gap-3">
@@ -146,6 +234,14 @@ export function AdminChallengesPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 mt-auto pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setDetailTarget(c)}
+                    className={`px-5 py-2.5 text-xs sm:text-sm inline-flex items-center gap-1.5 ${themeTokens.secondaryBtn}`}
+                  >
+                    <SparklesIcon className="w-4 h-4" />
+                    {t.challenges.detailBtn}
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleAdminToggleChallenge(c.id)}
@@ -179,6 +275,19 @@ export function AdminChallengesPage() {
           </div>
         )}
       </div>
+
+      {/* Shared file input for replacing an existing challenge's cover */}
+      <input
+        ref={cardPhotoRef}
+        type="file"
+        accept="image/*"
+        onChange={handleCardPhotoChange}
+        className="hidden"
+      />
+
+      {detailTarget && (
+        <ChallengeDetailModal challenge={detailTarget} onClose={() => setDetailTarget(null)} />
+      )}
     </div>
   );
 }

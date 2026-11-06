@@ -289,6 +289,18 @@ export function LunglowDataProvider({ children }) {
     showToast(lang === 'my' ? 'စိန်ခေါ်မှု ဖျက်ပြီးပါပြီ' : 'Challenge removed');
   };
 
+  // Replace the cover photo of an existing challenge (admin moderation).
+  const handleAdminUpdateChallengeCover = (challengeId, cover) => {
+    setChallenges((prev) =>
+      prev.map((c) => (c.id === challengeId ? { ...c, cover: cover || null } : c))
+    );
+    showToast(
+      lang === 'my'
+        ? 'စိန်ခေါ်မှု အဖုံးပုံ မွမ်းမံပြီးပါပြီ!'
+        : 'Challenge cover photo updated!'
+    );
+  };
+
   const handleJoinChallenge = (challengeId) => {
     setChallenges((prev) =>
       prev.map((c) =>
@@ -956,6 +968,7 @@ export function LunglowDataProvider({ children }) {
         handleAdminAddChallenge,
         handleAdminToggleChallenge,
         handleAdminDeleteChallenge,
+        handleAdminUpdateChallengeCover,
         handleJoinChallenge,
         handleChallengeLogDay,
         userRequests,
